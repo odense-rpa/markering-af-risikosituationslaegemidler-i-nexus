@@ -19,13 +19,21 @@ proces_navn = "Markering af Risikosituationslægemidler i Nexus"
 async def populate_queue(workqueue: Workqueue):
     logger = logging.getLogger(__name__)
 
-    logger.info("Hello from populate workqueue!")
+    logger.info("Indlæser kø")
+    organisation = nexus.organisationer.hent_organisation_ved_navn("Sundhedsklinik VIVO")
+    borgere = nexus.organisationer.hent_borgere_for_organisation(organisation)
+
+    for borger in borgere:
+        kø_item = {
+            "cpr": borger["patientIdentifier"]["identifier"]
+        }
+        workqueue.add_item(kø_item, kø_item["cpr"])
 
 
 async def process_workqueue(workqueue: Workqueue):
     logger = logging.getLogger(__name__)
 
-    logger.info("Hello from process workqueue!")
+    logger.info("")
 
     for item in workqueue:
         with item:
@@ -51,6 +59,12 @@ if __name__ == "__main__":
         default="./Indholdsstoffer.xlsx", 
         help="Populate the workqueue instead of processing it"
         )
+    
+    parser.add_argument(
+        "--queue",
+        action="store_true",
+        help="Populate the queue with test data and exit",
+    )
     args = parser.parse_args()
 
     # Validate Excel file exists
