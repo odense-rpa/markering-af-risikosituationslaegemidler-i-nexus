@@ -111,7 +111,11 @@ async def process_workqueue(workqueue: Workqueue):
                             "Beskrivelse": "Bemærkning opdateret på en eller flere lægemidler"
                         }
                     )
-                    
+
+                    tracker.track_task(process_name=proces_navn)
+                else:
+                    tracker.track_partial_task(process_name=proces_navn)
+
             except WorkItemError as e:
                 # A WorkItemError represents a soft error that indicates the item should be passed to manual processing or a business logic fault
                 logger.error(f"Error processing item: {data}. Error: {e}")
